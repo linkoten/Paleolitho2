@@ -8,20 +8,39 @@ import { getUserFromDatabase } from "@/lib/userAction";
 import { notFound } from "next/navigation";
 
 interface PageProps {
-  params: Promise<{ id: string }>; // Already updated to match the expected type
+  params: Promise<{ id: string }>; // Updated to match the expected type
   searchParams: Promise<{ [key: string]: string }>; // Updated to match the expected type
+}
+
+// Fonction pour générer les métadonnées dynamiques
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { id } = await params; // Résolution de la promesse pour obtenir l'ID
+
+  const product = await getProduct(id);
+
+  if (!product) {
+    return {
+      title: "Product Not Found",
+      description: "The requested product could not be found",
+    };
+  }
+
+  return {
+    title: `${product.title} | Paleolitho Shop`,
+    description: product.description || "Product details",
+  };
 }
 
 export default async function ProductPage({ params, searchParams }: PageProps) {
   const { userId } = await auth();
 
-  const { id } = await params; // Await the params if it's a Promise
-  const searchParamsResolved = await searchParams; // Await the searchParams if it's a Promise
+  const { id } = await params; // Résolution de la promesse pour les paramètres
+  const searchParamsResolved = await searchParams; // Résolution de la promesse pour les paramètres de recherche
 
-  // Data fetching
+  // Récupération des données
   const product = await getProduct(id);
-
-  // Récupérer les avis sur le produit
   const ratings = await getProductRatings(id);
 
   // Récupérer les informations utilisateur si connecté
