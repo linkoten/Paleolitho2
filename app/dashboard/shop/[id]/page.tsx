@@ -33,7 +33,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProductPage({ params }: PageProps) {
+export default async function ProductPage({ params }: any) {
   // Authentication check (mais sans redirection)
   const { userId } = await auth();
 

@@ -14,13 +14,7 @@ import Link from "next/link";
 import { getProduct, updateProduct } from "@/lib/actionsProducts";
 import ButtonToast from "@/app/components/ButtonToast";
 
-// Define the correct type for Next.js 14+ dynamic routes
-interface PageProps {
-  params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-}
-
-export default async function CreatePage({ params }: PageProps) {
+export default async function CreatePage({ params }: any) {
   const { id } = params;
 
   const product = await getProduct(id);
