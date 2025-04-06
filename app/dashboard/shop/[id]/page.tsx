@@ -39,6 +39,8 @@ export default async function ProductPage({ params, searchParams }: PageProps) {
   const { id } = await params; // Résolution de la promesse pour les paramètres
   const searchParamsResolved = await searchParams; // Résolution de la promesse pour les paramètres de recherche
 
+  console.log("Search Params:", searchParamsResolved); // Example usage
+
   // Récupération des données
   const product = await getProduct(id);
   const ratings = await getProductRatings(id);
