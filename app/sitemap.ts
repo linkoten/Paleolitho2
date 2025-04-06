@@ -1,28 +1,29 @@
 import { MetadataRoute } from "next";
 import { getAllProducts } from "@/lib/actionsProducts";
-import { getAllPosts } from "@/lib/actionsPost"; // Assurez-vous d'importer cette fonction si vous l'avez définie
+import { getAllPosts } from "@/lib/actionsPost";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // URL de base
   const baseUrl = "https://www.paleolitho.com";
 
   // Pages statiques
-  const staticPages = [
+  const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
       lastModified: new Date(),
-      changeFrequency: "weekly",
+      changeFrequency: "weekly", // Correctement typé
       priority: 1,
     },
     {
       url: `${baseUrl}/dashboard/shop`,
       lastModified: new Date(),
-      changeFrequency: "daily",
+      changeFrequency: "daily", // Correctement typé
       priority: 0.8,
     },
     {
       url: `${baseUrl}/dashboard/blog`,
       lastModified: new Date(),
-      changeFrequency: "weekly",
+      changeFrequency: "weekly", // Correctement typé
       priority: 0.7,
     },
   ];
@@ -34,7 +35,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     productPages = products.map((product) => ({
       url: `${baseUrl}/dashboard/shop/${product.id}`,
       lastModified: new Date(product.updatedAt),
-      changeFrequency: "weekly",
+      changeFrequency: "weekly", // Correctement typé
       priority: 0.6,
     }));
   } catch (error) {
@@ -47,12 +48,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Pages blog dynamiques (si applicable)
   let blogPages: MetadataRoute.Sitemap = [];
   try {
-    // Si vous avez une fonction pour récupérer tous les articles de blog
     const posts = await getAllPosts();
     blogPages = posts.map((post) => ({
       url: `${baseUrl}/dashboard/blog/${post.id}`,
       lastModified: new Date(post.updatedAt),
-      changeFrequency: "monthly",
+      changeFrequency: "monthly", // Correctement typé
       priority: 0.5,
     }));
   } catch (error) {
