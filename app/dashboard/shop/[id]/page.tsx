@@ -9,7 +9,7 @@ import { notFound } from "next/navigation";
 
 interface PageProps {
   params: { id: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+  searchParams: { [key: string]: string };
 }
 
 export async function generateMetadata({
