@@ -50,7 +50,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Si vous avez une fonction pour récupérer tous les articles de blog
     const posts = await getAllPosts();
     blogPages = posts.map((post) => ({
-      url: `${baseUrl}/dashboard/blog/${post.slug || post.id}`,
+      url: `${baseUrl}/dashboard/blog/${post.id}`,
       lastModified: new Date(post.updatedAt),
       changeFrequency: "monthly",
       priority: 0.5,

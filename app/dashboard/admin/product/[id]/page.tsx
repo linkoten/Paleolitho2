@@ -13,15 +13,16 @@ import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
 import { getProduct, updateProduct } from "@/lib/actionsProducts";
 import ButtonToast from "@/app/components/ButtonToast";
+import { Metadata } from "next";
 
 // Define the correct type for Next.js 14+ dynamic routes
 interface PageProps {
-  params: Promise<{ id: string }>;
-  searchParams?: Record<string, string | string[] | undefined>;
+  params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
 }
 
 export default async function CreatePage({ params }: PageProps) {
-  const { id } = await params;
+  const { id } = params;
 
   const product = await getProduct(id);
 

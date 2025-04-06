@@ -20,10 +20,10 @@ import { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { getUserFromDatabase } from "@/lib/userAction";
 
-// Define the correct type for searchParams in Next.js 14+
+// Define interface for Next.js 14 static pages with searchParams
 interface PageProps {
-  params: Record<string, never>; // Better than {} - explicitly means "empty object"
-  searchParams: Promise<{
+  params: {};
+  searchParams: {
     query?: string;
     page?: string;
     country?: string;
@@ -31,7 +31,7 @@ interface PageProps {
     period?: string;
     stages?: string;
     category?: string;
-  }>;
+  };
 }
 
 export const metadata: Metadata = {
@@ -40,16 +40,14 @@ export const metadata: Metadata = {
 };
 
 export default async function Home({ searchParams }: PageProps) {
-  const params = await searchParams;
+  const query = searchParams?.query || "";
+  const currentPage = Number(searchParams?.page) || 1;
 
-  const query = params?.query || "";
-  const currentPage = Number(params?.page) || 1;
-
-  const country = params?.country || "";
-  const locality = params?.locality || "";
-  const period = params?.period || "";
-  const stages = params?.stages || "";
-  const category = params?.category || "";
+  const country = searchParams?.country || "";
+  const locality = searchParams?.locality || "";
+  const period = searchParams?.period || "";
+  const stages = searchParams?.stages || "";
+  const category = searchParams?.category || "";
 
   const totalPages = await fetchProductsPages(
     query,

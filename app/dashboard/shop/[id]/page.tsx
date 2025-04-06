@@ -7,13 +7,16 @@ import { auth } from "@clerk/nextjs/server";
 import { getUserFromDatabase } from "@/lib/userAction";
 import { notFound } from "next/navigation";
 
-type Props = {
-  params: Promise<{ id: string }>;
-  searchParams?: Record<string, string | string[] | undefined>;
-};
+interface PageProps {
+  params: { id: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+}
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  // Get the id directly from params
+  const { id } = params;
 
   const product = await getProduct(id);
 
@@ -30,11 +33,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function ProductPage({ params }: Props) {
+export default async function ProductPage({ params }: PageProps) {
   // Authentication check (mais sans redirection)
   const { userId } = await auth();
 
-  const { id } = await params;
+  const { id } = params;
 
   // Data fetching
   const product = await getProduct(id);
