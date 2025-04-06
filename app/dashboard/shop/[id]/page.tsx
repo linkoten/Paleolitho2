@@ -7,18 +7,23 @@ import { auth } from "@clerk/nextjs/server";
 import { getUserFromDatabase } from "@/lib/userAction";
 import { notFound } from "next/navigation";
 
-// The correct way to define types for dynamic routes in Next.js 14+
-interface PageProps {
-  params: Promise<{ id: string }>;
-  searchParams: { [key: string]: string | string[] | undefined };
+interface Params {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  stock: number;
+  image: number[];
+}
+
+interface ProductPageProps {
+  params: Params;
 }
 
 export async function generateMetadata({
   params,
-}: PageProps): Promise<Metadata> {
-  // Await the params to properly access the id
-  const { id } = await params;
-  const product = await getProduct(id);
+}: ProductPageProps): Promise<Metadata> {
+  const product = await getProduct(params.id);
 
   if (!product) {
     return {
@@ -33,35 +38,36 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProductPage({ params }: PageProps) {
-  // Await the params before accessing properties
-  const { id } = await params;
-
-  // Authentication check
+export default async function ProductPage({ params }: any) {
+  // Authentication check (mais sans redirection)
   const { userId } = await auth();
 
-  // Data fetching using the awaited id
-  const product = await getProduct(id);
+  // Data fetching
+  const product = await getProduct(params.id);
 
   // Récupérer les avis sur le produit
-  const ratings = await getProductRatings(id);
+  const ratings = await getProductRatings(params.id);
 
-  // Rest of your code remains the same
+  // Récupérer les informations utilisateur si connecté
   let user = null;
   if (userId) {
     user = await getUserFromDatabase(userId);
   }
 
+  // Vérifier que le produit existe
   if (!product) {
     return notFound();
   }
 
+  // Vérifier que les avis sont disponibles
   if (!ratings) {
     console.error("Impossible de charger les avis pour ce produit");
   }
 
+  // Informer l'utilisateur s'il est connecté ou non
   const isAuthenticated = !!userId && !!user;
 
+  // Render main component
   return (
     <>
       {!isAuthenticated && (
