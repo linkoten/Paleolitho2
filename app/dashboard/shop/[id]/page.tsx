@@ -7,20 +7,19 @@ import { auth } from "@clerk/nextjs/server";
 import { getUserFromDatabase } from "@/lib/userAction";
 import { notFound } from "next/navigation";
 
-// For dynamic routes, params should only include the route parameters
-interface PageParams {
+// Define params type correctly
+type PageParams = {
   id: string;
-}
+};
 
-// The Next.js PageProps interface expects this structure
-interface ProductPageProps {
+// Define the standard Next.js page props
+type Props = {
   params: PageParams;
-  searchParams: Record<string, string | string[] | undefined>;
-}
+  searchParams: { [key: string]: string | string[] | undefined };
+};
 
-export async function generateMetadata({
-  params,
-}: ProductPageProps): Promise<Metadata> {
+// Use the correct Props type for metadata generation
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProduct(params.id);
 
   if (!product) {
@@ -36,7 +35,8 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+// Use the same Props type for the page component
+export default async function ProductPage({ params }: Props) {
   // Authentication check (mais sans redirection)
   const { userId } = await auth();
 
