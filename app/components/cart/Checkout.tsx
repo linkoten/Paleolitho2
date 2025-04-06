@@ -10,7 +10,7 @@ export default function Checkout(user: any) {
   const [loading, setLoading] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState("France");
+  const [selectedCountry, setSelectedCountry] = useState("");
 
   useEffect(() => {
     const checkStockAvailability = () => {
