@@ -18,7 +18,6 @@ import { Suspense } from "react";
 import Loading from "@/app/components/Loading";
 import { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import { getUserFromDatabase } from "@/lib/userAction";
 
 export const metadata: Metadata = {
@@ -39,14 +38,6 @@ export default async function Home({
     category?: string;
   };
 }) {
-  const { userId } = await auth();
-
-  if (!userId) {
-    redirect("/");
-  }
-
-  const user = await getUserFromDatabase(userId); // Get from YOUR DB (again, now with stripeCustomerId)
-
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
 
@@ -76,17 +67,25 @@ export default async function Home({
   );
 
   const items = await getAllProducts();
-  if (!user) {
-    // Rediriger vers la page de connexion si l'utilisateur n'est pas connecté
-    return <div>Please sign in</div>;
+
+  // Récupérer l'utilisateur actuel (peut être null)
+  const { userId } = await auth();
+  let user = null;
+
+  if (userId) {
+    try {
+      user = await getUserFromDatabase(userId);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      // Si une erreur se produit, user reste null
+    }
   }
 
   if (!totalPages) {
     return (
       <>
-        <div className=" text-center text-xl pt-20">
-          {" "}
-          Il n&apos;y a aucun produits qui correspondent à vos critères !
+        <div className="text-center text-xl pt-20">
+          Il n&apos;y a aucun produit qui correspond à vos critères !
         </div>
       </>
     );
@@ -106,6 +105,15 @@ export default async function Home({
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
+
+      {!userId && (
+        <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-4 text-amber-800">
+          <p>
+            Connectez-vous pour ajouter des produits à vos favoris et effectuer
+            des achats.
+          </p>
+        </div>
+      )}
 
       <Search placeholder="Recherche..." />
 

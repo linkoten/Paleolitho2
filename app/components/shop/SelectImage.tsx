@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, X, ZoomIn, ZoomOut } from "lucide-react";
+import { ShoppingCart, X, ZoomIn, ZoomOut, Lock } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -40,10 +40,13 @@ import {
 } from "@/lib/actionsProducts";
 import { Products, User } from "@/generated/prisma";
 import { TextGenerateEffect } from "@/components/ui/text-generate-effect";
+import { toast } from "sonner";
+
 interface SelectImageProps {
   product: Products;
-  user: User;
+  user: User | null;
   ratings: any;
+  isAuthenticated: boolean;
 }
 
 type ProductWithoutSomeProps = Omit<
@@ -65,6 +68,7 @@ export default function SelectImage({
   product,
   user,
   ratings,
+  isAuthenticated,
 }: SelectImageProps) {
   const [activeImage, setActiveImage] = useState(product.images[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -138,6 +142,11 @@ export default function SelectImage({
     );
   };
 
+  // Gestion quand l'utilisateur n'est pas connecté
+  const handleAuthRequired = () => {
+    toast.error("Veuillez vous connecter pour utiliser cette fonctionnalité");
+  };
+
   const words = product.description;
 
   return (
@@ -159,7 +168,7 @@ export default function SelectImage({
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
-          <div className="flex flex-col  gap-6">
+          <div className="flex flex-col gap-6">
             {/* Première colonne : Carousel et images secondaires */}
             <div className="space-y-4 ">
               <h2 className="text-2xl font-bold pt-12">{product.title}</h2>
@@ -210,11 +219,21 @@ export default function SelectImage({
               <div></div>
               <TextGenerateEffect words={words!} className=" text-xs" />
 
-              <ProductRating
-                productId={product.id}
-                userId={user.id}
-                ratings={ratings}
-              />
+              {isAuthenticated ? (
+                <ProductRating
+                  productId={product.id}
+                  userId={user!.id}
+                  ratings={ratings}
+                />
+              ) : (
+                <div className="flex items-center justify-center py-4 px-2 border border-dashed rounded-md border-gray-300 bg-gray-50">
+                  <Lock className="h-4 w-4 mr-2 text-gray-500" />
+                  <span className="text-sm text-gray-500">
+                    Connectez-vous pour noter ce produit
+                  </span>
+                </div>
+              )}
+
               <div className="flex flex-wrap gap-2 justify-center">
                 {["category", "country", "locality", "period", "stages"].map(
                   (badgeType) => (
@@ -249,46 +268,57 @@ export default function SelectImage({
             <div className="space-y-4 flex flex-col justify-between ">
               {product.stock > 0 && <div className="flex mb-2"></div>}
               {product.stock > 0 ? (
-                <form action={addToCart}>
-                  <Input
-                    type="text"
-                    name="userId"
-                    defaultValue={user.id}
-                    className="  hidden"
-                  />{" "}
-                  <Input
-                    type="text"
-                    name="productId"
-                    defaultValue={product.id}
-                    className="  hidden"
-                  />{" "}
-                  <div className="w-full flex flex-col items-center gap-2">
-                    <label htmlFor="quantity" className="font-medium text-sm">
-                      Quantité:
-                    </label>
-                    <div className="flex gap-2 w-full justify-center">
-                      <Input
-                        id="quantity"
-                        type="number"
-                        name="quantity"
-                        min="1"
-                        max={product.stock}
-                        defaultValue={1}
-                        className="w-24"
-                      />
-                      <ButtonToast
-                        toastText="Produit ajouté au panier"
-                        type="submit"
-                        className="w-1/2"
-                      >
-                        <ShoppingCart className="mr-2 h-5 w-5" />
-                        Ajouter au panier
-                      </ButtonToast>
+                isAuthenticated ? (
+                  <form action={addToCart}>
+                    <Input
+                      type="text"
+                      name="userId"
+                      defaultValue={user!.id}
+                      className="hidden"
+                    />
+                    <Input
+                      type="text"
+                      name="productId"
+                      defaultValue={product.id}
+                      className="hidden"
+                    />
+                    <div className="w-full flex flex-col items-center gap-2">
+                      <label htmlFor="quantity" className="font-medium text-sm">
+                        Quantité:
+                      </label>
+                      <div className="flex gap-2 w-full justify-center">
+                        <Input
+                          id="quantity"
+                          type="number"
+                          name="quantity"
+                          min="1"
+                          max={product.stock}
+                          defaultValue={1}
+                          className="w-24"
+                        />
+                        <ButtonToast
+                          toastText="Produit ajouté au panier"
+                          type="submit"
+                          className="w-1/2"
+                        >
+                          <ShoppingCart className="mr-2 h-5 w-5" />
+                          Ajouter au panier
+                        </ButtonToast>
+                      </div>
                     </div>
-                  </div>
-                </form>
+                  </form>
+                ) : (
+                  <Button
+                    onClick={handleAuthRequired}
+                    className="w-full opacity-70"
+                    variant="outline"
+                  >
+                    <Lock className="h-4 w-4 mr-2" /> Connexion requise pour
+                    acheter
+                  </Button>
+                )
               ) : (
-                <Button className=" bg-red-500 hover:bg-red-600 line-through cursor-not-allowed ">
+                <Button className="bg-red-500 hover:bg-red-600 line-through cursor-not-allowed">
                   <ShoppingCart className="mr-2 h-5 w-5" /> Ajouter au panier
                 </Button>
               )}

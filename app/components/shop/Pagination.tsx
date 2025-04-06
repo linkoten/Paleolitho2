@@ -1,72 +1,67 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
 import Link from "next/link";
 import { generatePagination } from "@/lib/utils";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Button } from "@/components/ui/button";
 
 export default function Pagination({ totalPages }: { totalPages: number }) {
+  // NOTE: Uncomment this code in Chapter 11
+
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get("page")) || 1;
 
-  // Create URL for page navigation
   const createPageURL = (pageNumber: number | string) => {
     const params = new URLSearchParams(searchParams);
     params.set("page", pageNumber.toString());
     return `${pathname}?${params.toString()}`;
   };
 
-  // Generate pagination array
   const allPages = generatePagination(currentPage, totalPages);
 
-  // If there's only one page, don't show pagination
-  if (totalPages <= 1) {
-    return null;
-  }
-
   return (
-    <nav aria-label="Pagination" className="flex justify-center">
-      <ul className="flex items-center gap-1">
-        <li>
+    <>
+      {/*  NOTE: Uncomment this code in Chapter 11 */}
+
+      {
+        <div className="inline-flex">
           <PaginationArrow
-            direction="prev"
+            direction="left"
             href={createPageURL(currentPage - 1)}
             isDisabled={currentPage <= 1}
           />
-        </li>
 
-        {allPages.map((page, index) => {
-          let position: "first" | "last" | "middle" | "single" | undefined;
+          <div className="flex -space-x-px">
+            {allPages.map((page, index) => {
+              let position: "first" | "last" | "single" | "middle" | undefined;
 
-          if (index === 0) position = "first";
-          if (index === allPages.length - 1) position = "last";
-          if (allPages.length === 1) position = "single";
-          if (page === "...") position = "middle";
+              if (index === 0) position = "first";
+              if (index === allPages.length - 1) position = "last";
+              if (allPages.length === 1) position = "single";
+              if (page === "...") position = "middle";
 
-          return (
-            <li key={page}>
-              <PaginationNumber
-                page={page}
-                href={createPageURL(page)}
-                isActive={currentPage === page}
-                position={position}
-              />
-            </li>
-          );
-        })}
+              return (
+                <PaginationNumber
+                  key={page}
+                  href={createPageURL(page)}
+                  page={page}
+                  position={position}
+                  isActive={currentPage === page}
+                />
+              );
+            })}
+          </div>
 
-        <li>
           <PaginationArrow
-            direction="next"
+            direction="right"
             href={createPageURL(currentPage + 1)}
             isDisabled={currentPage >= totalPages}
           />
-        </li>
-      </ul>
-    </nav>
+        </div>
+      }
+    </>
   );
 }
 
@@ -78,74 +73,60 @@ function PaginationNumber({
 }: {
   page: number | string;
   href: string;
-  isActive: boolean;
   position?: "first" | "last" | "middle" | "single";
+  isActive: boolean;
 }) {
-  // For ellipsis
-  if (page === "...") {
-    return (
-      <div className="flex h-9 w-9 items-center justify-center">
-        <MoreHorizontal className="h-4 w-4" />
-        <span className="sr-only">Plus de pages</span>
-      </div>
-    );
-  }
+  const className = clsx(
+    "flex h-10 w-10 items-center justify-center text-sm border",
+    {
+      "rounded-l-md": position === "first" || position === "single",
+      "rounded-r-md": position === "last" || position === "single",
+      "z-10 bg-blue-600 border-blue-600 text-white": isActive,
+      "hover:bg-gray-100": !isActive && position !== "middle",
+      "text-gray-300": position === "middle",
+    }
+  );
 
-  // For page numbers
-  return isActive ? (
-    <div
-      className={cn(
-        "flex h-9 w-9 items-center justify-center rounded-md bg-primary text-primary-foreground font-medium"
-      )}
-      aria-current="page"
-    >
-      {page}
-    </div>
+  return isActive || position === "middle" ? (
+    <div className={className}>{page}</div>
   ) : (
-    <Link
-      href={href}
-      className={cn(
-        "flex h-9 w-9 items-center justify-center rounded-md border text-sm transition-colors hover:bg-muted"
-      )}
-    >
+    <Link href={href} className={className}>
       {page}
-      <span className="sr-only">Page {page}</span>
     </Link>
   );
 }
 
 function PaginationArrow({
-  direction,
   href,
+  direction,
   isDisabled,
 }: {
-  direction: "prev" | "next";
   href: string;
+  direction: "left" | "right";
   isDisabled?: boolean;
 }) {
-  const Icon = direction === "prev" ? ChevronLeft : ChevronRight;
-  const label = direction === "prev" ? "Page précédente" : "Page suivante";
+  const className = clsx(
+    "flex h-10 w-10 items-center justify-center rounded-md border",
+    {
+      "pointer-events-none text-gray-300": isDisabled,
+      "hover:bg-gray-100": !isDisabled,
+      "mr-2 md:mr-4": direction === "left",
+      "ml-2 md:ml-4": direction === "right",
+    }
+  );
 
-  if (isDisabled) {
-    return (
-      <Button
-        variant="outline"
-        size="icon"
-        disabled
-        className="h-9 w-9 cursor-not-allowed opacity-50"
-      >
-        <Icon className="h-4 w-4" />
-        <span className="sr-only">{label}</span>
-      </Button>
+  const icon =
+    direction === "left" ? (
+      <ArrowLeftIcon className="w-4" />
+    ) : (
+      <ArrowRightIcon className="w-4" />
     );
-  }
 
-  return (
-    <Button variant="outline" size="icon" asChild className="h-9 w-9">
-      <Link href={href}>
-        <Icon className="h-4 w-4" />
-        <span className="sr-only">{label}</span>
-      </Link>
-    </Button>
+  return isDisabled ? (
+    <div className={className}>{icon}</div>
+  ) : (
+    <Link className={className} href={href}>
+      {icon}
+    </Link>
   );
 }

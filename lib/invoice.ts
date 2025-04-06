@@ -63,11 +63,7 @@ function generateHeader(doc: PDFKit.PDFDocument) {
     .moveDown();
 }
 
-function generateCustomerInformation(
-  doc: PDFKit.PDFDocument,
-  order: any,
-  address: any
-) {
+function generateCustomerInformation(doc: PDFKit.PDFDocument, order: any) {
   doc.fillColor("#444444").fontSize(20).text("Facture", 50, 160);
 
   generateHr(doc, 185);

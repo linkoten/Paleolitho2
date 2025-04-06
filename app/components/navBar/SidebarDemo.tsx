@@ -9,12 +9,16 @@ import {
   Settings,
   CreditCard,
   HomeIcon as House,
+  UserIcon,
 } from "lucide-react";
 import Favicon from "@/public/favicon.png";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 
-export function SidebarDemo({ user }: any) {
-  const userEmail = user.email as string;
+export function SidebarDemo({ user }: { user: any }) {
+  // Gestion sécurisée de l'email et du rôle de l'utilisateur
+  const userEmail = user?.email || "Anonyme";
+  const userRole = user?.role || "USER";
+
   const links = [
     {
       label: "Home",
@@ -37,7 +41,7 @@ export function SidebarDemo({ user }: any) {
         <NotebookPen className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
       ),
     },
-    ...(user.role === "ADMIN"
+    ...(userRole === "ADMIN"
       ? [
           {
             label: "Admin",
@@ -77,14 +81,18 @@ export function SidebarDemo({ user }: any) {
               link={{
                 label: userEmail,
                 href: "#",
-                icon: (
+                icon: user?.image ? (
                   <Image
-                    src={Favicon || "/placeholder.svg"}
-                    className="h-7 w-7 flex-shrink-0 rounded-full"
+                    src={user.image}
+                    className="h-7 w-7 flex-shrink-0 rounded-full object-cover"
                     width={50}
                     height={50}
                     alt="Avatar"
                   />
+                ) : (
+                  <div className="h-7 w-7 flex-shrink-0 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                    <UserIcon className="h-4 w-4 text-gray-500 dark:text-gray-400" />
+                  </div>
                 ),
               }}
             />
@@ -106,7 +114,7 @@ export const Logo = () => {
         height={512}
         width={512}
         alt="Favicon Paleolitho"
-        className="h-8 w-10  dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0"
+        className="h-8 w-10 dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0"
       />
       <motion.span
         initial={{ opacity: 0 }}
@@ -118,6 +126,7 @@ export const Logo = () => {
     </Link>
   );
 };
+
 export const LogoIcon = () => {
   return (
     <Link
@@ -129,10 +138,8 @@ export const LogoIcon = () => {
         height={512}
         width={512}
         alt="Favicon Paleolitho"
-        className="h-8 w-10  dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0"
+        className="h-8 w-10 dark:bg-white rounded-br-lg rounded-tr-sm rounded-tl-lg rounded-bl-sm flex-shrink-0"
       />
     </Link>
   );
 };
-
-// Dummy dashboard component with content

@@ -12,7 +12,6 @@ import { prisma } from "@/lib/db";
 export default async function SuccessPage() {
   const { userId } = await auth();
   let orderSuccess = true;
-  let errorMessage = "";
 
   if (!userId) {
     redirect("/");

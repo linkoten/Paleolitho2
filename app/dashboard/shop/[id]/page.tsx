@@ -4,7 +4,6 @@ import SelectImage from "@/app/components/shop/SelectImage";
 import Loading from "@/app/components/Loading";
 import { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import { getUserFromDatabase } from "@/lib/userAction";
 import { notFound } from "next/navigation";
 
@@ -40,40 +39,53 @@ export async function generateMetadata({
 }
 
 export default async function ProductPage({ params }: ProductPageProps) {
-  // Authentication check
+  // Authentication check (mais sans redirection)
   const { userId } = await auth();
-  if (!userId) {
-    redirect("/");
-  }
-
+  
   // Data fetching
-  const [product, user, ratings] = await Promise.all([
-    getProduct(params.id),
-    getUserFromDatabase(userId),
-    getProductRatings(params.id),
-  ]);
-
-  // Error handling
+  const product = await getProduct(params.id);
+  
+  // Récupérer les avis sur le produit
+  const ratings = await getProductRatings(params.id);
+  
+  // Récupérer les informations utilisateur si connecté
+  let user = null;
+  if (userId) {
+    user = await getUserFromDatabase(userId);
+  }
+  
+  // Vérifier que le produit existe
   if (!product) {
     return notFound();
   }
-
-  if (!user) {
-    return (
-      <div>User information could not be loaded. Please try again later.</div>
-    );
-  }
-
+  
+  // Vérifier que les avis sont disponibles
   if (!ratings) {
-    return (
-      <div>Product ratings could not be loaded. Please try again later.</div>
-    );
+    console.error("Impossible de charger les avis pour ce produit");
   }
+
+  // Informer l'utilisateur s'il est connecté ou non
+  const isAuthenticated = !!userId && !!user;
 
   // Render main component
   return (
-    <Suspense fallback={<Loading />}>
-      <SelectImage product={product} user={user} ratings={ratings} />
-    </Suspense>
+    <>
+      {!isAuthenticated && (
+        <div className="bg-amber-50 border border-amber-200 rounded-md p-4 mb-4 text-amber-800">
+          <p>
+            Connectez-vous pour ajouter ce produit à votre panier ou le noter.
+          </p>
+        </div>
+      )}
+      
+      <Suspense fallback={<Loading />}>
+        <SelectImage 
+          product={product} 
+          user={user} 
+          ratings={ratings} 
+          isAuthenticated={isAuthenticated} 
+        />
+      </Suspense>
+    </>
   );
 }

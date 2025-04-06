@@ -22,12 +22,21 @@ interface Products {
 
 interface ListCardsProps {
   products: Products[];
-  user: User;
+  user: User | null; // Rendre user optionnel
 }
 
 async function ListCards({ products, user }: ListCardsProps) {
-  const userId = user.id;
-  const favorite = await getFavoritesProducts(userId);
+  // Si l'utilisateur n'est pas connecté, afficher la grille sans fonctionnalités de favoris
+  let favorite = null;
+
+  if (user) {
+    // Récupérer les favoris seulement si un utilisateur est connecté
+    try {
+      favorite = await getFavoritesProducts(user.id);
+    } catch (error) {
+      console.error("Erreur lors de la récupération des favoris:", error);
+    }
+  }
 
   return (
     <div className="container mx-auto py-6">

@@ -1,8 +1,7 @@
-import React, { Suspense } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { auth } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 import { getUserFromDatabase } from "@/lib/userAction";
 import { getFavoritesProducts } from "@/lib/actionsProducts";
 import { prisma } from "@/lib/db";
@@ -25,7 +24,9 @@ import {
   PackageIcon,
   ChevronRightIcon,
   ShoppingCartIcon,
-  BadgeCheckIcon,
+  UserIcon,
+  LogInIcon,
+  BookOpenIcon,
 } from "lucide-react";
 import {
   Breadcrumb,
@@ -35,6 +36,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Suspense } from "react";
 
 // Fonctions d'aide pour formater les dates et montants
 const formatDate = (dateString: string | Date) => {
@@ -44,10 +46,6 @@ const formatDate = (dateString: string | Date) => {
     month: "2-digit",
     year: "numeric",
   }).format(date);
-};
-
-const formatPrice = (price: number) => {
-  return (price / 100).toFixed(2) + " €";
 };
 
 const getStatusBadge = (status: string) => {
@@ -90,22 +88,74 @@ const getStatusBadge = (status: string) => {
 export default async function DashboardHomePage() {
   // Authentication check
   const { userId } = await auth();
+
+  // Si l'utilisateur n'est pas connecté, afficher une page alternative
   if (!userId) {
-    redirect("/");
+    return (
+      <div className="container max-w-7xl mx-auto px-4 py-8">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Mon compte</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="rounded-full bg-muted p-8 mb-6">
+            <UserIcon className="h-16 w-16 text-muted-foreground" />
+          </div>
+
+          <h1 className="text-3xl font-bold mb-4">Connexion requise</h1>
+
+          <p className="text-muted-foreground max-w-md mb-8">
+            Pour accéder à vos produits favoris et à l'historique de vos
+            commandes, veuillez vous connecter ou créer un compte.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Button asChild size="lg" className="min-w-[200px]">
+              <Link href="/sign-in">
+                <LogInIcon className="mr-2 h-5 w-5" />
+                Se connecter
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="min-w-[200px]">
+              <Link href="/dashboard/shop">
+                <ShoppingCartIcon className="mr-2 h-5 w-5" />
+                Visiter la boutique
+              </Link>
+            </Button>
+            <Button asChild variant="ghost" className="min-w-[200px]">
+              <Link href="/dashboard/blog">
+                <BookOpenIcon className="mr-2 h-5 w-5" />
+                Parcourir le blog
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
-  // Get user data
+  // Get user data pour utilisateurs connectés
   const user = await getUserFromDatabase(userId);
   if (!user) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Erreur d'authentification</h1>
+          <h1 className="text-2xl font-bold mb-4">
+            Erreur d&apos;authentification
+          </h1>
           <p className="mb-4">
             Impossible de charger les informations utilisateur.
           </p>
           <Button asChild>
-            <Link href="/">Retour à l'accueil</Link>
+            <Link href="/dashboard/shop">Retour à la boutique</Link>
           </Button>
         </div>
       </div>
@@ -144,6 +194,7 @@ export default async function DashboardHomePage() {
     parsedProducts: order.products ? JSON.parse(order.products) : [],
   }));
 
+  // Afficher la page complète pour les utilisateurs connectés
   return (
     <div className="container max-w-7xl mx-auto px-4 py-8">
       <Breadcrumb className="mb-6">
@@ -240,7 +291,7 @@ export default async function DashboardHomePage() {
                     Aucun produit favori
                   </h3>
                   <p className="text-muted-foreground mb-8">
-                    Vous n'avez pas encore ajouté de produits à vos favoris
+                    Vous n&apos;avez pas encore ajouté de produits à vos favoris
                   </p>
                   <Button asChild>
                     <Link href="/dashboard/shop">
@@ -344,7 +395,7 @@ export default async function DashboardHomePage() {
                   </div>
                   <h3 className="text-lg font-medium mb-2">Aucune commande</h3>
                   <p className="text-muted-foreground mb-8">
-                    Vous n'avez pas encore passé de commande
+                    Vous n&apos;avez pas encore passé de commande
                   </p>
                   <Button asChild>
                     <Link href="/dashboard/shop">

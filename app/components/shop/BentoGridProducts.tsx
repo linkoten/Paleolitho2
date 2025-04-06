@@ -6,13 +6,14 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { Star } from "lucide-react";
+import { Star, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import ButtonToast from "@/app/components/ButtonToast";
 import { Button } from "@/components/ui/button";
 import { toggleFavorite } from "@/lib/actionsProducts";
 import { addToCart } from "@/lib/actionsCart";
 import { User } from "@/generated/prisma";
+import { toast } from "sonner";
 
 interface Product {
   id: string;
@@ -32,8 +33,8 @@ interface Product {
 
 interface BentoGridProps {
   products: Product[];
-  user: User;
-  favorite: any;
+  user: User | null;
+  favorite: any | null;
 }
 
 export const BentoGrid = ({
@@ -60,18 +61,25 @@ export const BentoGridItem = ({
   product,
   user,
   isFavorite,
+  isAuthenticated,
 }: {
   className?: string;
   product: Product;
-  user: User;
+  user: User | null;
   isFavorite: boolean;
+  isAuthenticated: boolean;
 }) => {
   const productId = product.id;
-  const userId = user.id;
+  const userId = user?.id;
   const toastText = "Le produit a été ajouté au panier";
   const toastTextFavorite = isFavorite
     ? "Produit supprimé des favoris"
     : "Produit ajouté aux favoris";
+  
+  // Gestion quand l'utilisateur n'est pas connecté
+  const handleAuthRequired = () => {
+    toast.error("Veuillez vous connecter pour utiliser cette fonctionnalité");
+  };
 
   return (
     <motion.div
@@ -86,33 +94,43 @@ export const BentoGridItem = ({
           {product.title}
         </h2>
         <div className="flex space-x-2 items-center">
-          <form action={(formData) => toggleFavorite(formData).then(() => {})}>
-            <Input
-              type="text"
-              name="userId"
-              defaultValue={userId}
-              className="hidden"
-            />
-            <Input
-              type="text"
-              name="productId"
-              defaultValue={productId}
-              className="hidden"
-            />
-            <ButtonToast
-              type="submit"
-              variant={"outline"}
-              toastText={toastTextFavorite}
-              className="border border-yellow-200 p-1"
-            >
-              <Star
-                className={`cursor-pointer ${
-                  isFavorite ? "fill-yellow-300" : ""
-                }`}
-                size={18}
+          {isAuthenticated ? (
+            <form action={(formData) => toggleFavorite(formData).then(() => {})}>
+              <Input
+                type="text"
+                name="userId"
+                defaultValue={userId}
+                className="hidden"
               />
-            </ButtonToast>
-          </form>
+              <Input
+                type="text"
+                name="productId"
+                defaultValue={productId}
+                className="hidden"
+              />
+              <ButtonToast
+                type="submit"
+                variant={"outline"}
+                toastText={toastTextFavorite}
+                className="border border-yellow-200 p-1"
+              >
+                <Star
+                  className={`cursor-pointer ${
+                    isFavorite ? "fill-yellow-300" : ""
+                  }`}
+                  size={18}
+                />
+              </ButtonToast>
+            </form>
+          ) : (
+            <button
+              onClick={handleAuthRequired}
+              className="border border-yellow-200 p-1 opacity-50 cursor-not-allowed"
+              disabled
+            >
+              <Star size={18} />
+            </button>
+          )}
           <Badge variant={"secondary"} className="text-sm">
             {product.price}€
           </Badge>
@@ -159,38 +177,48 @@ export const BentoGridItem = ({
         </p>
 
         {product.stock > 0 ? (
-          <form
-            action={(formData) => addToCart(formData).then(() => {})}
-            className="flex space-x-2"
-          >
-            <Input
-              type="text"
-              name="userId"
-              defaultValue={userId}
-              className="hidden"
-            />
-            <Input
-              type="text"
-              name="productId"
-              defaultValue={productId}
-              className="hidden"
-            />
-            <Input
-              type="number"
-              name="quantity"
-              defaultValue={1}
-              min={1}
-              max={product.stock}
-              className="w-16 text-sm"
-            />
-            <ButtonToast
-              toastText={toastText}
-              type="submit"
-              className="text-sm"
+          isAuthenticated ? (
+            <form
+              action={(formData) => addToCart(formData).then(() => {})}
+              className="flex space-x-2"
             >
-              Ajouter
-            </ButtonToast>
-          </form>
+              <Input
+                type="text"
+                name="userId"
+                defaultValue={userId}
+                className="hidden"
+              />
+              <Input
+                type="text"
+                name="productId"
+                defaultValue={productId}
+                className="hidden"
+              />
+              <Input
+                type="number"
+                name="quantity"
+                defaultValue={1}
+                min={1}
+                max={product.stock}
+                className="w-16 text-sm"
+              />
+              <ButtonToast
+                toastText={toastText}
+                type="submit"
+                className="text-sm"
+              >
+                Ajouter
+              </ButtonToast>
+            </form>
+          ) : (
+            <Button 
+              onClick={handleAuthRequired}
+              className="text-sm opacity-70"
+              variant="outline"
+            >
+              <Lock className="h-3 w-3 mr-2" /> Connexion requise
+            </Button>
+          )
         ) : (
           <Button
             disabled
@@ -209,23 +237,24 @@ export default function BentoGridProducts({
   user,
   favorite,
 }: BentoGridProps) {
+  const isAuthenticated = !!user; // Vérifier si l'utilisateur est authentifié
+
   return (
     <BentoGrid className="max-w-7xl mx-auto px-4">
       {products.map((product, i) => {
-        const isFavorite = favorite?.favorites.some(
-          (fav: any) => fav.product.id === product.id
-        );
+        // Si l'utilisateur est authentifié et a des favoris, on vérifie si ce produit est un favori
+        const isFavorite = isAuthenticated && favorite?.favorites 
+          ? favorite.favorites.some((fav: any) => fav.product.id === product.id)
+          : false;
 
-        const isEvenRow = Math.floor(i / 2) % 2 === 0; // Détermine si la ligne est paire ou impaire
-        const isFirstProduct = i % 2 === 0; // Détermine si c'est le premier produit de la ligne
+        const isEvenRow = Math.floor(i / 2) % 2 === 0;
+        const isFirstProduct = i % 2 === 0;
 
         let itemClass = "";
 
         if (isEvenRow) {
-          // Ligne paire
           itemClass = isFirstProduct ? "md:col-span-2" : "md:col-span-1";
         } else {
-          // Ligne impaire
           itemClass = isFirstProduct ? "md:col-span-1" : "md:col-span-2";
         }
 
@@ -235,6 +264,7 @@ export default function BentoGridProducts({
             product={product}
             user={user}
             isFavorite={isFavorite}
+            isAuthenticated={isAuthenticated}
             className={itemClass}
           />
         );

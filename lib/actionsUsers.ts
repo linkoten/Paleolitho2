@@ -1,7 +1,5 @@
 "use server";
 import { prisma } from "./db";
-import { redirect } from "next/navigation";
-import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 
 export const updateUser = async (formData: FormData) => {

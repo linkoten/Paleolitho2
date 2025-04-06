@@ -1,4 +1,4 @@
-"use client"; // Changer "use server" en "use client"
+"use client";
 
 import {
   Sheet,
@@ -13,17 +13,55 @@ import Image from "next/image";
 import Checkout from "./Checkout";
 import ButtonToast from "../ButtonToast";
 import Link from "next/link";
+import { toast } from "sonner";
 
-export default function Cart({ user }: { user: any }) {
+export default function Cart({
+  user,
+  isAuthenticated = false,
+}: {
+  user?: any;
+  isAuthenticated?: boolean;
+}) {
+  // Si l'utilisateur n'est pas authentifié ou s'il n'y a pas d'objet utilisateur
+  if (!isAuthenticated || !user) {
+    return (
+      <button
+        onClick={() =>
+          toast.error("Veuillez vous connecter pour accéder à votre panier")
+        }
+        className="flex opacity-50 cursor-not-allowed"
+        disabled
+        aria-label="Connexion requise pour accéder au panier"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={1.5}
+          stroke="currentColor"
+          className="size-6"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+          />
+        </svg>
+        <div>0</div>
+      </button>
+    );
+  }
+
+  // Calcul sécurisé du prix total
   let totalPrice = 0;
-  if (user.cart?.cartItems) {
-    console.log(user.cart?.cartItems);
-    totalPrice = user.cart.cartItems.reduce((acc: any, item: any) => {
+  const cartItems = user?.cart?.cartItems || [];
+
+  if (cartItems.length > 0) {
+    totalPrice = cartItems.reduce((acc: number, item: any) => {
       if (item.product && item.product.price) {
         return acc + item.product.price * item.quantity;
-      } else {
-        return acc; // Handle missing product price gracefully
       }
+      return acc;
     }, 0);
   }
 
@@ -44,7 +82,7 @@ export default function Cart({ user }: { user: any }) {
             d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
           />
         </svg>
-        <div>{user.cart?.cartItems ? user.cart.cartItems.length : 0}</div>
+        <div>{cartItems.length}</div>
       </SheetTrigger>
       <SheetContent className="overflow-auto">
         <SheetHeader>
@@ -53,8 +91,8 @@ export default function Cart({ user }: { user: any }) {
           <div className="mt-16">
             <div className="flow-root">
               <ul role="list" className="divide-gray-200 my-6 divide-y">
-                {user.cart?.cartItems && user.cart.cartItems.length > 0 ? (
-                  user.cart.cartItems.map((item: any) => (
+                {cartItems.length > 0 ? (
+                  cartItems.map((item: any) => (
                     <li key={item.id} className="flex py-6">
                       {item.product && item.product.images && (
                         <div className="border-gray-200 relative size-24 flex-shrink-0 overflow-hidden rounded-md border">
@@ -95,7 +133,7 @@ export default function Cart({ user }: { user: any }) {
                             <input
                               type="hidden"
                               name="cartId"
-                              defaultValue={user.cart.id}
+                              defaultValue={user.cart?.id}
                             />
                             <input
                               type="hidden"
@@ -120,7 +158,7 @@ export default function Cart({ user }: { user: any }) {
                   </div>
                 )}
               </ul>
-              {user.cart?.cartItems && user.cart.cartItems.length > 0 && (
+              {cartItems.length > 0 && (
                 <div className="border-gray-200 border-t px-4 py-6 sm:px-6">
                   <div className="text-gray-900 flex justify-between text-base font-medium">
                     <p>Subtotal</p>
