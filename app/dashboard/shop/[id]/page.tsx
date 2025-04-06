@@ -7,20 +7,23 @@ import { auth } from "@clerk/nextjs/server";
 import { getUserFromDatabase } from "@/lib/userAction";
 import { notFound } from "next/navigation";
 
-// Define params type correctly
+// Update the params interface to only include the expected route parameter
 type PageParams = {
   id: string;
 };
 
-// Define the standard Next.js page props
-type Props = {
+// Use the standard Next.js page props interface
+type PageProps = {
   params: PageParams;
   searchParams: { [key: string]: string | string[] | undefined };
 };
 
-// Use the correct Props type for metadata generation
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const product = await getProduct(params.id);
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  // Await the params to properly access the id
+  const { id } = await params;
+  const product = await getProduct(id);
 
   if (!product) {
     return {
@@ -35,37 +38,35 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// Use the same Props type for the page component
-export default async function ProductPage({ params }: Props) {
-  // Authentication check (mais sans redirection)
+export default async function ProductPage({ params }: PageProps) {
+  // Await the params before accessing properties
+  const { id } = await params;
+
+  // Authentication check
   const { userId } = await auth();
 
-  // Data fetching
-  const product = await getProduct(params.id);
+  // Data fetching using the awaited id
+  const product = await getProduct(id);
 
   // Récupérer les avis sur le produit
-  const ratings = await getProductRatings(params.id);
+  const ratings = await getProductRatings(id);
 
-  // Récupérer les informations utilisateur si connecté
+  // Rest of your code remains the same
   let user = null;
   if (userId) {
     user = await getUserFromDatabase(userId);
   }
 
-  // Vérifier que le produit existe
   if (!product) {
     return notFound();
   }
 
-  // Vérifier que les avis sont disponibles
   if (!ratings) {
     console.error("Impossible de charger les avis pour ce produit");
   }
 
-  // Informer l'utilisateur s'il est connecté ou non
   const isAuthenticated = !!userId && !!user;
 
-  // Render main component
   return (
     <>
       {!isAuthenticated && (
