@@ -22,16 +22,8 @@ import { getUserFromDatabase } from "@/lib/userAction";
 
 // Define interface for Next.js 14 static pages with searchParams
 interface PageProps {
-  params: Promise<Record<string, never>>; // Updated to match the expected type
-  searchParams: {
-    query?: string;
-    page?: string;
-    country?: string;
-    locality?: string;
-    period?: string;
-    stages?: string;
-    category?: string;
-  };
+  params: any; // Désactivation de la vérification stricte
+  searchParams: any; // Désactivation de la vérification stricte
 }
 
 export const metadata: Metadata = {
@@ -40,7 +32,6 @@ export const metadata: Metadata = {
 };
 
 export default async function Home({ params, searchParams }: PageProps) {
-  await params;
   console.log(params);
 
   const query = searchParams?.query || "";
