@@ -1,7 +1,6 @@
 import { MetadataRoute } from "next";
 import { getAllProducts } from "@/lib/actionsProducts";
-import { getAllBlogPosts } from "@/lib/actionsBlog"; // Si vous avez cette fonction
-
+import { getAllPosts } from "@/lib/actionsPost"; // Assurez-vous d'importer cette fonction si vous l'avez définie
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // URL de base
   const baseUrl = "https://www.paleolitho.com";
@@ -49,15 +48,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let blogPages: MetadataRoute.Sitemap = [];
   try {
     // Si vous avez une fonction pour récupérer tous les articles de blog
-    if (typeof getAllBlogPosts === "function") {
-      const posts = await getAllBlogPosts();
-      blogPages = posts.map((post) => ({
-        url: `${baseUrl}/dashboard/blog/${post.slug || post.id}`,
-        lastModified: new Date(post.updatedAt),
-        changeFrequency: "monthly",
-        priority: 0.5,
-      }));
-    }
+    const posts = await getAllPosts();
+    blogPages = posts.map((post) => ({
+      url: `${baseUrl}/dashboard/blog/${post.slug || post.id}`,
+      lastModified: new Date(post.updatedAt),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    }));
   } catch (error) {
     console.error(
       "Erreur lors de la récupération des articles pour le sitemap:",
