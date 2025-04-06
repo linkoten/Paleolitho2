@@ -20,15 +20,10 @@ import { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { getUserFromDatabase } from "@/lib/userAction";
 
-export const metadata: Metadata = {
-  title: "Paleolitho/shop",
-  description: "Official Shop of Paleolitho where you can find and buy Fossils",
-};
-
-export default async function Home({
-  searchParams,
-}: {
-  searchParams?: {
+// Define the correct type for searchParams in Next.js 14+
+interface PageProps {
+  params: {};
+  searchParams: Promise<{
     query?: string;
     page?: string;
     country?: string;
@@ -36,16 +31,25 @@ export default async function Home({
     period?: string;
     stages?: string;
     category?: string;
-  };
-}) {
-  const query = searchParams?.query || "";
-  const currentPage = Number(searchParams?.page) || 1;
+  }>;
+}
 
-  const country = searchParams?.country || "";
-  const locality = searchParams?.locality || "";
-  const period = searchParams?.period || "";
-  const stages = searchParams?.stages || "";
-  const category = searchParams?.category || "";
+export const metadata: Metadata = {
+  title: "Paleolitho/shop",
+  description: "Official Shop of Paleolitho where you can find and buy Fossils",
+};
+
+export default async function Home({ searchParams }: PageProps) {
+  const params = await searchParams;
+
+  const query = params?.query || "";
+  const currentPage = Number(params?.page) || 1;
+
+  const country = params?.country || "";
+  const locality = params?.locality || "";
+  const period = params?.period || "";
+  const stages = params?.stages || "";
+  const category = params?.category || "";
 
   const totalPages = await fetchProductsPages(
     query,
