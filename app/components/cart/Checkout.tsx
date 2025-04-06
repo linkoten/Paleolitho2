@@ -4,17 +4,16 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
-import CountryModal from "@/app/components/cart/CountryModal"; // Assurez-vous que le chemin est correct
+import CountryModal from "@/app/components/cart/CountryModal";
 
-export default function Checkout(user: any) {
+export default function Checkout({ user }: { user: any }) {
   const [loading, setLoading] = useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedCountry, setSelectedCountry] = useState("");
 
   useEffect(() => {
     const checkStockAvailability = () => {
-      const cartItems = user.user.cart.cartItems;
+      const cartItems = user.cart.cartItems;
       const isStockExceeded = cartItems.some(
         (item: any) => item.quantity > item.product.stock
       );
@@ -29,20 +28,19 @@ export default function Checkout(user: any) {
   };
 
   const handleCountrySelect = (country: string) => {
-    setSelectedCountry(country);
     checkout(country);
   };
 
-  const checkout = async (selectedCountry: string) => {
+  const checkout = async (country: string) => {
     setLoading(true);
     try {
-      const cartItems = user.user.cart.cartItems;
-      console.log("Cart items:", cartItems, selectedCountry);
+      const cartItems = user.cart.cartItems;
+      console.log("Cart items:", cartItems, country);
 
       // Send all cart items in one request
       const response = await axios.post("/api/webhook/stripe/payment", {
         cartItems,
-        country: selectedCountry,
+        country,
       });
       const responseData = await response.data;
       console.log("Response data:", responseData);
@@ -53,11 +51,12 @@ export default function Checkout(user: any) {
       setLoading(false);
     }
   };
+
   return (
     <div className="mt-6">
       <Button
         onClick={handleCheckoutClick}
-        className=" w-full "
+        className="w-full"
         disabled={isButtonDisabled || loading}
       >
         {loading ? "Processing..." : "Checkout"}
