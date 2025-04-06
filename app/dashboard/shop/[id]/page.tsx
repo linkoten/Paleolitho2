@@ -2,28 +2,27 @@ import React, { Suspense } from "react";
 import { getProduct, getProductRatings } from "@/lib/actionsProducts";
 import SelectImage from "@/app/components/shop/SelectImage";
 import Loading from "@/app/components/Loading";
-import { Metadata } from "next";
+import { Metadata, ResolvingMetadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { getUserFromDatabase } from "@/lib/userAction";
 import { notFound } from "next/navigation";
 
 interface Params {
   id: string;
-  title: string;
-  description: string;
-  price: number;
-  stock: number;
-  image: number[];
 }
 
-interface ProductPageProps {
-  params: Params;
-}
+type Props = {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
 
-export async function generateMetadata({
-  params,
-}: ProductPageProps): Promise<Metadata> {
-  const product = await getProduct(params.id);
+export async function generateMetadata(
+  { params, searchParams }: Props,
+  parent: ResolvingMetadata
+): Promise<Metadata> {
+  const { id } = await params;
+
+  const product = await getProduct(id);
 
   if (!product) {
     return {
@@ -38,15 +37,17 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProductPage({ params }: any) {
+export default async function ProductPage({ params, searchParams }: Props) {
   // Authentication check (mais sans redirection)
   const { userId } = await auth();
 
+  const { id } = await params;
+
   // Data fetching
-  const product = await getProduct(params.id);
+  const product = await getProduct(id);
 
   // Récupérer les avis sur le produit
-  const ratings = await getProductRatings(params.id);
+  const ratings = await getProductRatings(id);
 
   // Récupérer les informations utilisateur si connecté
   let user = null;
