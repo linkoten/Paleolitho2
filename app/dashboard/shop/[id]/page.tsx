@@ -8,7 +8,7 @@ import { getUserFromDatabase } from "@/lib/userAction";
 import { notFound } from "next/navigation";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>; // Updated to match the expected type
   searchParams: { [key: string]: string };
 }
 
@@ -16,7 +16,7 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   // Get the id directly from params
-  const { id } = params;
+  const { id } = await params; // Await the params if it's a Promise
 
   const product = await getProduct(id);
 
@@ -33,11 +33,11 @@ export async function generateMetadata({
   };
 }
 
-export default async function ProductPage({ params }: any) {
+export default async function ProductPage({ params }: PageProps) {
   // Authentication check (mais sans redirection)
   const { userId } = await auth();
 
-  const { id } = params;
+  const { id } = await params;
 
   // Data fetching
   const product = await getProduct(id);
