@@ -22,7 +22,7 @@ import { getUserFromDatabase } from "@/lib/userAction";
 
 // Define the correct type for searchParams in Next.js 14+
 interface PageProps {
-  params: {};
+  params: Record<string, never>; // Better than {} - explicitly means "empty object"
   searchParams: Promise<{
     query?: string;
     page?: string;
