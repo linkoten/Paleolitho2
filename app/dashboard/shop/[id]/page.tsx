@@ -2,7 +2,7 @@ import React, { Suspense } from "react";
 import { getProduct, getProductRatings } from "@/lib/actionsProducts";
 import SelectImage from "@/app/components/shop/SelectImage";
 import Loading from "@/app/components/Loading";
-import { Metadata, ResolvingMetadata } from "next";
+import { Metadata } from "next";
 import { auth } from "@clerk/nextjs/server";
 import { getUserFromDatabase } from "@/lib/userAction";
 import { notFound } from "next/navigation";
