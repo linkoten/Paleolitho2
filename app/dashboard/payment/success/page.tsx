@@ -69,10 +69,6 @@ export default async function SuccessPage() {
     } catch (error) {
       console.error("Erreur lors de la création de la commande:", error);
       orderSuccess = false;
-      errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Une erreur est survenue lors de la création de la commande";
     }
   }
 
