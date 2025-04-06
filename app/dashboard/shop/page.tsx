@@ -22,6 +22,7 @@ import { getUserFromDatabase } from "@/lib/userAction";
 
 // Define interface for Next.js 14 static pages with searchParams
 interface PageProps {
+  // eslint-disable-next-line @typescript-eslint/ban-types
   params: {};
   searchParams: {
     query?: string;
