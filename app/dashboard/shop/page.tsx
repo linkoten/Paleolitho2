@@ -22,7 +22,7 @@ import { getUserFromDatabase } from "@/lib/userAction";
 
 // Define interface for Next.js 14 static pages with searchParams
 interface PageProps {
-  params: Record<string, never>;
+  params: Promise<Record<string, never>>; // Updated to match the expected type
   searchParams: {
     query?: string;
     page?: string;
@@ -39,7 +39,10 @@ export const metadata: Metadata = {
   description: "Official Shop of Paleolitho where you can find and buy Fossils",
 };
 
-export default async function Home({ searchParams }: PageProps) {
+export default async function Home({ params, searchParams }: PageProps) {
+  await params;
+  console.log(params);
+
   const query = searchParams?.query || "";
   const currentPage = Number(searchParams?.page) || 1;
 
