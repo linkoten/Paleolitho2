@@ -16,12 +16,6 @@ import ButtonToast from "@/app/components/ButtonToast";
 
 interface Params {
   id: string;
-  title: string;
-  description: string;
-  price: number;
-  stock: number;
-  images: string;
-  weight: number;
 }
 
 interface UpdatePageProps {
