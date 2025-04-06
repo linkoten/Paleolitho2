@@ -17,7 +17,7 @@ import ButtonToast from "@/app/components/ButtonToast";
 // Define the correct type for Next.js 14+ dynamic routes
 interface PageProps {
   params: Promise<{ id: string }>;
-  searchParams?: { [key: string]: string | string[] | undefined };
+  searchParams?: Record<string, string | string[] | undefined>;
 }
 
 export default async function CreatePage({ params }: PageProps) {
