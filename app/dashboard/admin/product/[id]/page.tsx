@@ -14,18 +14,8 @@ import Link from "next/link";
 import { getProduct, updateProduct } from "@/lib/actionsProducts";
 import ButtonToast from "@/app/components/ButtonToast";
 
-// Define the correct type for params in Next.js App Router
-interface PageProps {
-  params: {
-    id: string;
-  };
-}
-
-export default async function CreatePage({ params }: PageProps) {
-  // Use await on the entire params object before accessing its properties
-  const { id } = await params;
-
-  const product = await getProduct(id);
+export default async function CreatePage({ params }: any) {
+  const product = await getProduct(params.id);
 
   console.log(product);
 
