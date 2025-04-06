@@ -113,7 +113,7 @@ export default async function DashboardHomePage() {
           <h1 className="text-3xl font-bold mb-4">Connexion requise</h1>
 
           <p className="text-muted-foreground max-w-md mb-8">
-            Pour accéder à vos produits favoris et à l'historique de vos
+            Pour accéder à vos produits favoris et à l&apos;historique de vos
             commandes, veuillez vous connecter ou créer un compte.
           </p>
 
