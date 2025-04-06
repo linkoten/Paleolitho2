@@ -7,12 +7,15 @@ import { auth } from "@clerk/nextjs/server";
 import { getUserFromDatabase } from "@/lib/userAction";
 import { notFound } from "next/navigation";
 
-interface Params {
+// For dynamic routes, params should only include the route parameters
+interface PageParams {
   id: string;
 }
 
+// The Next.js PageProps interface expects this structure
 interface ProductPageProps {
-  params: Params;
+  params: PageParams;
+  searchParams: Record<string, string | string[] | undefined>;
 }
 
 export async function generateMetadata({
