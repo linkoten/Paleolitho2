@@ -7,16 +7,11 @@ import { auth } from "@clerk/nextjs/server";
 import { getUserFromDatabase } from "@/lib/userAction";
 import { notFound } from "next/navigation";
 
-// Update the params interface to only include the expected route parameter
-type PageParams = {
-  id: string;
-};
-
-// Use the standard Next.js page props interface
-type PageProps = {
-  params: PageParams;
+// The correct way to define types for dynamic routes in Next.js 14+
+interface PageProps {
+  params: Promise<{ id: string }>;
   searchParams: { [key: string]: string | string[] | undefined };
-};
+}
 
 export async function generateMetadata({
   params,
